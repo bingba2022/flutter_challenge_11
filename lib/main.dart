@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
+Color mainColor = const Color(0xFFe54d3c);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -10,106 +15,257 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: HomeScreen(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomeScreenState extends State<HomeScreen> {
+  List<dynamic> times = [15, 20, 25, 30, 35];
 
-  void _incrementCounter() {
+  int mins = 0;
+  int secs = 0;
+  bool isRunning = false;
+
+  void setTimer(int mins, int secs) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      this.mins = mins;
+      this.secs = secs;
+    });
+  }
+
+  void startTimer() {
+    setState(() {
+      isRunning = true;
+    });
+    const oneSec = Duration(seconds: 1);
+    Timer.periodic(oneSec, (timer) {
+      if (mins == 0 && secs == 0) {
+        setState(() {
+          isRunning = false;
+        });
+        timer.cancel();
+      } else if (secs == 0) {
+        setState(() {
+          mins--;
+          secs = 59;
+        });
+      } else {
+        setState(() {
+          secs--;
+        });
+      }
+    });
+  }
+
+  void pauseTimer() {
+    setState(() {
+      isRunning = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
+      backgroundColor: mainColor,
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        elevation: 0.0,
+        backgroundColor: mainColor,
+        title: Text(
+          'POMOTIMER',
+          style: GoogleFonts.poppins(
+            fontSize: 22.0,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.2,
+          ),
         ),
+        centerTitle: false,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TimeCard(
+                  time: mins,
+                ),
+                Text(
+                  ':',
+                  style: GoogleFonts.poppins(
+                    fontSize: 55.0,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white38,
+                  ),
+                ),
+                TimeCard(
+                  time: secs,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 45,
+            width: 350,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: times.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: OutlinedButton(
+                    onPressed: () {
+                      mins = times[index];
+                      startTimer();
+                    },
+                    style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                      width: 2.5,
+                      color: Colors.white38,
+                    )),
+                    child: Text(
+                      '${times[index]}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 22.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              pauseTimer();
+            },
+            iconSize: 90.0,
+            icon: const CircleAvatar(
+              radius: 80.0,
+              backgroundColor: Colors.black26,
+              child: Icon(
+                Icons.pause_rounded,
+                size: 50.0,
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              RoundAndGoal(
+                thisText: 0,
+                totalText: 4,
+                text: 'ROUND',
+              ),
+              RoundAndGoal(
+                thisText: 0,
+                totalText: 12,
+                text: 'GOAL',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RoundAndGoal extends StatelessWidget {
+  RoundAndGoal({
+    required this.thisText,
+    required this.totalText,
+    required this.text,
+    super.key,
+  });
+
+  int thisText;
+  int totalText;
+  String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          '$thisText/$totalText',
+          style: GoogleFonts.poppins(
+            fontSize: 25.0,
+            color: Colors.white38,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Text(text,
+            style: GoogleFonts.poppins(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            )),
+      ],
+    );
+  }
+}
+
+class TimeCard extends StatelessWidget {
+  TimeCard({
+    super.key,
+    required this.time,
+  });
+
+  int time;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        const Card(
+          elevation: 0.0,
+          color: Colors.white,
+          child: SizedBox(
+            height: 175.0,
+            width: 140.0,
+          ),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -3),
+          child: Container(
+            height: 175.0,
+            width: 128,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6.0),
+              color: Colors.white54,
+            ),
+          ),
+        ),
+        Transform.translate(
+          offset: const Offset(0, -7),
+          child: Container(
+            height: 175.0,
+            width: 115,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6.0),
+              color: Colors.white54,
+            ),
+          ),
+        ),
+        Text('$time',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: 90.0,
+              color: mainColor,
+            )),
+      ],
     );
   }
 }
