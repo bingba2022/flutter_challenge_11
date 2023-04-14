@@ -30,11 +30,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<dynamic> times = [15, 20, 25, 30, 35];
-
+  List<dynamic> times = [1, 20, 25, 30, 35];
+  int round = 0;
   int mins = 0;
   int secs = 0;
   bool isRunning = false;
+  bool isPaused = false;
+  bool isSelected = false;
 
   void setTimer(int mins, int secs) {
     setState(() {
@@ -54,11 +56,14 @@ class _HomeScreenState extends State<HomeScreen> {
           isRunning = false;
         });
         timer.cancel();
+        onRoundFinished();
       } else if (secs == 0) {
         setState(() {
           mins--;
           secs = 59;
         });
+      } else if (isPaused == true) {
+        isRunning == false;
       } else {
         setState(() {
           secs--;
@@ -69,7 +74,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void pauseTimer() {
     setState(() {
-      isRunning = false;
+      isPaused = true;
+    });
+  }
+
+  void onRoundFinished() {
+    setState(() {
+      round++;
     });
   }
 
@@ -127,7 +138,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: OutlinedButton(
                     onPressed: () {
                       mins = times[index];
+                      secs = 0;
                       startTimer();
+                      isPaused = false;
+                      isSelected = true;
                     },
                     style: OutlinedButton.styleFrom(
                         side: const BorderSide(
@@ -148,23 +162,24 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             onPressed: () {
-              pauseTimer();
+              if (isRunning == true) {
+                pauseTimer();
+              }
             },
             iconSize: 90.0,
             icon: const CircleAvatar(
-              radius: 80.0,
-              backgroundColor: Colors.black26,
-              child: Icon(
-                Icons.pause_rounded,
-                size: 50.0,
-              ),
-            ),
+                radius: 80.0,
+                backgroundColor: Colors.black26,
+                child: Icon(
+                  Icons.pause_rounded,
+                  size: 50.0,
+                )),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               RoundAndGoal(
-                thisText: 0,
+                thisText: round,
                 totalText: 4,
                 text: 'ROUND',
               ),
@@ -259,7 +274,7 @@ class TimeCard extends StatelessWidget {
             ),
           ),
         ),
-        Text('$time',
+        Text(time < 10 ? '0$time' : '$time',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               fontSize: 90.0,
